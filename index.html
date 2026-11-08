@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Happy Diwali</title>
 <meta name="description" content="Wishing you a bright and joyful Diwali">
 <meta property="og:title" content="Happy Diwali">
@@ -13,407 +13,511 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Tiro+Devanagari+Serif&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #160f08;
-    --bg-deep: #0f0a05;
-    --gold: #d9a441;
-    --gold-bright: #f0c569;
-    --cream: #f4e8d2;
-    --cream-dim: #cdbb9c;
-    --clay: #8a4a2b;
-    --clay-dark: #5f3018;
-    --flame-core: #fff3c4;
-    --flame-mid: #f6b23e;
-    --flame-edge: #d96a1e;
-  }
+:root{
+  --bg:#160f08; --bg-deep:#0f0a05;
+  --gold:#d9a441; --gold-bright:#f0c569; --gold-soft:rgba(217,164,65,.55);
+  --cream:#f4e8d2; --cream-dim:#cdbb9c;
+  --clay:#8a4a2b; --clay-dark:#5f3018; --clay-unlit:#4a3120; --clay-unlit-dark:#33200f;
+  --flame-core:#fff3c4; --flame-mid:#f6b23e; --flame-edge:#d96a1e;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{
+  font-family:'Cormorant Garamond',Georgia,serif;color:var(--cream);
+  min-height:100svh;position:relative;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 115%, rgba(217,106,30,.14), transparent 60%),
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(217,164,65,.07), transparent 65%),
+    var(--bg);
+}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#sky.live{pointer-events:auto}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ---------- stage system ---------- */
+.stage{
+  position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  opacity:0;visibility:hidden;transform:scale(.965);
+  transition:opacity .85s cubic-bezier(.22,.8,.32,1),transform .85s cubic-bezier(.22,.8,.32,1),visibility 0s linear .85s;
+}
+.stage.active{opacity:1;visibility:visible;transform:scale(1);transition:opacity .85s cubic-bezier(.22,.8,.32,1) .25s,transform .85s cubic-bezier(.22,.8,.32,1) .25s,visibility 0s}
+.stage.leaving{opacity:0;transform:scale(1.045);transition:opacity .6s ease,transform .6s ease,visibility 0s linear .6s}
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    overflow-x: hidden;
-  }
+/* ---------- progress dots ---------- */
+#dots{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:12px}
+#dots i{width:7px;height:7px;border-radius:50%;border:1px solid var(--gold-soft);background:transparent;transition:all .5s ease;transform:rotate(45deg);border-radius:1px}
+#dots i.on{background:var(--gold);box-shadow:0 0 10px rgba(217,164,65,.7)}
 
-  body {
-    font-family: 'Cormorant Garamond', 'Georgia', serif;
-    color: var(--cream);
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    background:
-      radial-gradient(ellipse 120% 70% at 50% 115%, rgba(217, 106, 30, 0.14), transparent 60%),
-      radial-gradient(ellipse 90% 55% at 50% -15%, rgba(217, 164, 65, 0.07), transparent 65%),
-      var(--bg);
-  }
+/* ---------- animated buttons ---------- */
+.btn{
+  position:relative;display:inline-block;cursor:pointer;border:1px solid var(--gold-soft);
+  background:linear-gradient(180deg, rgba(217,164,65,.16), rgba(217,164,65,.05));
+  color:var(--gold-bright);font-family:inherit;font-size:clamp(1.05rem,2.2vw + .6rem,1.3rem);
+  letter-spacing:.18em;text-transform:uppercase;padding:.95em 2.4em;border-radius:999px;
+  animation:btnPulse 2.4s ease-in-out infinite;
+  transition:transform .12s ease, background .3s ease, box-shadow .3s ease;
+}
+.btn::before{ /* travelling shimmer */
+  content:"";position:absolute;inset:0;border-radius:inherit;overflow:hidden;
+  background:linear-gradient(115deg, transparent 30%, rgba(255,233,176,.28) 50%, transparent 70%);
+  background-size:250% 100%;animation:shimmer 3.2s linear infinite;pointer-events:none;
+}
+.btn::after{ /* outer glow ring */
+  content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;
+  box-shadow:0 0 0 0 rgba(240,197,105,.0);animation:ringPulse 2.4s ease-out infinite;
+}
+.btn:active{transform:scale(.93);background:linear-gradient(180deg, rgba(217,164,65,.32), rgba(217,164,65,.12))}
+.btn.hidden{display:none}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 0 14px rgba(217,164,65,.22), inset 0 0 8px rgba(217,164,65,.10)}
+  50%{box-shadow:0 0 30px rgba(240,197,105,.45), inset 0 0 14px rgba(217,164,65,.18)}
+}
+@keyframes shimmer{0%{background-position:220% 0}100%{background-position:-120% 0}}
+@keyframes ringPulse{0%{box-shadow:0 0 0 0 rgba(240,197,105,.35)}100%{box-shadow:0 0 0 18px rgba(240,197,105,0)}}
 
-  #sky {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* ---------- shared type ---------- */
+.eyebrow{font-size:clamp(.95rem,2vw + .5rem,1.2rem);letter-spacing:.34em;text-transform:uppercase;color:var(--gold);opacity:.9}
+.sub{font-style:italic;color:var(--cream-dim);font-size:clamp(1.1rem,2.2vw + .6rem,1.5rem);max-width:30ch;line-height:1.5}
+.rise{animation:rise 1.2s cubic-bezier(.22,.8,.32,1) both}
+.d1{animation-delay:.15s}.d2{animation-delay:.35s}.d3{animation-delay:.6s}.d4{animation-delay:.85s}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ---------- greeting ---------- */
-  .greeting {
-    position: relative;
-    z-index: 2;
-    padding: 0 24px;
-    animation: rise 1.6s cubic-bezier(.22,.8,.32,1) both;
-  }
+/* ---------- stage 1: opening ---------- */
+.emblem{position:relative;width:clamp(120px,26vw,170px);height:clamp(120px,26vw,170px);margin-bottom:clamp(20px,4vh,36px)}
+.emblem .halo{position:absolute;inset:-22%;border-radius:50%;
+  background:radial-gradient(circle, rgba(246,178,62,.30) 0%, rgba(246,178,62,.06) 55%, transparent 72%);
+  animation:breathe 2.6s ease-in-out infinite alternate}
+.emblem svg{width:100%;height:100%;filter:drop-shadow(0 0 18px rgba(246,178,62,.45))}
+.emblem .e-flame{transform-origin:50% 78%;animation:flick 1s ease-in-out infinite alternate}
+#st-open h2{font-weight:500;font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--cream);letter-spacing:.06em;margin-bottom:10px}
+#st-open .sub{margin-bottom:clamp(26px,5vh,44px)}
 
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(26px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* ---------- diyas (shared) ---------- */
+.diyas{display:flex;justify-content:center;align-items:flex-end;gap:clamp(14px,4.5vw,48px);padding:0 8px}
+.diya{position:relative;width:var(--s);height:calc(var(--s)*.72);cursor:pointer;transition:transform .15s ease}
+.diya:active{transform:scale(.94)}
+.diya:nth-child(1),.diya:nth-child(5){--s:clamp(46px,11vw,66px)}
+.diya:nth-child(2),.diya:nth-child(4){--s:clamp(56px,13vw,84px)}
+.diya:nth-child(3){--s:clamp(66px,15vw,104px)}
+.bowl{position:absolute;bottom:0;left:0;width:100%;height:46%;border-radius:6% 6% 50% 50%/12% 12% 120% 120%;
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,214,140,.10), transparent 55%),linear-gradient(180deg,var(--clay-unlit) 0%,var(--clay-unlit-dark) 100%);
+  box-shadow:inset 0 -4px 8px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.5);transition:background 1s ease}
+.bowl::before{content:"";position:absolute;top:-8%;left:-4%;width:108%;height:30%;border-radius:50%;
+  background:linear-gradient(180deg,#5a4030,#3a2812);box-shadow:inset 0 2px 3px rgba(255,220,160,.12),inset 0 -3px 5px rgba(0,0,0,.5);transition:background 1s ease}
+.diya.lit .bowl{background:radial-gradient(ellipse at 50% 0%, rgba(255,214,140,.28), transparent 55%),linear-gradient(180deg,var(--clay) 0%,var(--clay-dark) 100%)}
+.diya.lit .bowl::before{background:linear-gradient(180deg,#a05a34,#7a3f22);box-shadow:inset 0 2px 3px rgba(255,220,160,.35),inset 0 -3px 5px rgba(0,0,0,.5)}
+.flame-wrap{position:absolute;bottom:46%;left:50%;transform:translateX(-50%);width:26%;height:58%;display:flex;align-items:flex-end;justify-content:center}
+.flame{position:relative;width:100%;height:100%;border-radius:50% 50% 50% 50%/68% 68% 32% 32%;
+  background:radial-gradient(ellipse at 50% 78%, var(--flame-core) 0%, var(--flame-mid) 42%, var(--flame-edge) 78%, transparent 100%);
+  transform-origin:50% 92%;transform:scale(0);opacity:0}
+.flame::after{content:"";position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:42%;height:44%;
+  background:radial-gradient(ellipse at 50% 70%, #fffbe8, rgba(255,243,196,0) 72%);border-radius:50%}
+.diya.lit .flame{animation:ignite .7s cubic-bezier(.34,1.56,.64,1) forwards, flick .95s .7s ease-in-out infinite alternate;filter:drop-shadow(0 0 8px rgba(246,178,62,.75))}
+.diya:nth-child(odd).lit .flame{animation-duration:.7s,1.13s}
+.diya:nth-child(3).lit .flame{animation-duration:.7s,.82s}
+@keyframes ignite{0%{transform:scale(0) rotate(-8deg);opacity:0}55%{transform:scale(1.25) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes flick{0%{transform:scaleY(1) scaleX(1) rotate(-1.6deg)}35%{transform:scaleY(1.06) scaleX(.97) rotate(1.2deg)}70%{transform:scaleY(.97) scaleX(1.03) rotate(-.8deg)}100%{transform:scaleY(1.03) scaleX(.98) rotate(1.8deg)}}
+.glow{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);width:340%;padding-top:340%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle, rgba(246,178,62,.20) 0%, rgba(246,178,62,.05) 42%, transparent 68%);
+  opacity:0;transition:opacity 1.2s ease}
+.diya.lit .glow{opacity:1;animation:breathe 2.6s ease-in-out infinite alternate}
+.diya:nth-child(2).lit .glow{animation-delay:-.9s}.diya:nth-child(4).lit .glow{animation-delay:-1.4s}.diya:nth-child(3).lit .glow{animation-duration:2.1s}
+@keyframes breathe{from{opacity:.65}to{opacity:1}}
+.wick-hint{position:absolute;bottom:52%;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;
+  background:rgba(240,197,105,.9);box-shadow:0 0 12px 4px rgba(240,197,105,.5);animation:hintPulse 1.4s ease-in-out infinite;pointer-events:none}
+.diya.lit .wick-hint{display:none}
+@keyframes hintPulse{0%,100%{transform:translateX(-50%) scale(1);opacity:.9}50%{transform:translateX(-50%) scale(1.5);opacity:.4}}
 
-  .hindi {
-    font-family: 'Tiro Devanagari Serif', 'Cormorant Garamond', serif;
-    font-size: clamp(1.05rem, 2.6vw + 0.6rem, 1.55rem);
-    color: var(--gold);
-    letter-spacing: 0.14em;
-    margin-bottom: clamp(14px, 3vh, 26px);
-    opacity: 0.92;
-  }
+/* ---------- spark burst (diya ignition) ---------- */
+.spark{position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:6;
+  background:radial-gradient(circle,#fff3c4, #f6b23e 60%, transparent 75%);
+  animation:sparkFly .8s cubic-bezier(.17,.67,.35,1) forwards}
+@keyframes sparkFly{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}
+}
 
-  h1 {
-    font-weight: 500;
-    font-size: clamp(3rem, 11vw, 6.4rem);
-    line-height: 1.02;
-    letter-spacing: 0.015em;
-    color: var(--gold-bright);
-    text-shadow: 0 0 34px rgba(240, 197, 105, 0.22);
-  }
+/* ---------- stage 2: diyas ---------- */
+#st-diyas .eyebrow{margin-bottom:10px}
+#st-diyas h2{font-weight:500;font-size:clamp(1.7rem,5vw,2.6rem);color:var(--gold-bright);margin-bottom:8px}
+#st-diyas .sub{margin-bottom:clamp(26px,6vh,54px)}
+#diya-count{font-size:1rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream-dim);margin-top:clamp(24px,5vh,44px);min-height:1.4em;transition:opacity .4s}
+#st-diyas .btn{margin-top:18px}
+.ground-glow{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:min(90vw,640px);height:120px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse, rgba(246,178,62,.14), transparent 70%);opacity:0;transition:opacity 1.6s ease}
+#st-diyas.all-lit .ground-glow{opacity:1}
 
-  .rule {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin: clamp(18px, 3.6vh, 30px) auto;
-    width: min(320px, 62vw);
-  }
-  .rule::before, .rule::after {
-    content: "";
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(to var(--dir, right), transparent, rgba(217,164,65,.55));
-  }
-  .rule::after { --dir: left; }
-  .rule span {
-    width: 7px; height: 7px;
-    background: var(--gold);
-    transform: rotate(45deg);
-    box-shadow: 0 0 10px rgba(217,164,65,.6);
-  }
+/* ---------- stage 3: fireworks ---------- */
+#st-fire{justify-content:flex-end;padding-bottom:max(34px, env(safe-area-inset-bottom));pointer-events:none}
+#st-fire .hint-card{pointer-events:none;margin-bottom:14px}
+#st-fire h2{font-weight:500;font-size:clamp(1.6rem,4.6vw,2.4rem);color:var(--gold-bright);text-shadow:0 2px 18px rgba(0,0,0,.6)}
+#st-fire .sub{font-size:clamp(1rem,2vw + .5rem,1.3rem);text-shadow:0 2px 12px rgba(0,0,0,.7)}
+#st-fire .btn{pointer-events:auto;margin-top:10px}
+#burst-count{font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--cream-dim);text-shadow:0 2px 10px rgba(0,0,0,.7);margin-top:6px;min-height:1.3em}
 
-  .wish {
-    font-size: clamp(1.2rem, 2.4vw + 0.75rem, 1.7rem);
-    font-style: italic;
-    font-weight: 400;
-    color: var(--cream-dim);
-    max-width: 34ch;
-    margin: 0 auto;
-    line-height: 1.45;
-  }
+/* ---------- stage 4: final wish ---------- */
+#st-final .hindi{font-family:'Tiro Devanagari Serif','Cormorant Garamond',serif;
+  font-size:clamp(1.05rem,2.6vw + .6rem,1.55rem);color:var(--gold);letter-spacing:.14em;
+  margin-bottom:clamp(12px,2.6vh,24px);opacity:.92}
+#st-final h1{font-weight:500;font-size:clamp(3rem,11vw,6.4rem);line-height:1.02;letter-spacing:.015em;color:var(--gold-bright);
+  text-shadow:0 0 34px rgba(240,197,105,.22)}
+.rule{display:flex;align-items:center;justify-content:center;gap:14px;margin:clamp(16px,3.2vh,28px) auto;width:min(320px,62vw)}
+.rule::before,.rule::after{content:"";height:1px;flex:1;background:linear-gradient(to var(--dir,right), transparent, var(--gold-soft))}
+.rule::after{--dir:left}
+.rule span{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 10px rgba(217,164,65,.6)}
+#st-final .wish{font-size:clamp(1.2rem,2.4vw + .75rem,1.7rem);font-style:italic;color:var(--cream-dim);max-width:34ch;margin:0 auto;line-height:1.45}
+#st-final .diyas{margin-top:clamp(26px,5.5vh,52px);pointer-events:none}
+#st-final .diya{cursor:default}
+#st-final .btn{margin-top:clamp(22px,4.5vh,40px);font-size:clamp(.9rem,1.6vw + .5rem,1.05rem);padding:.8em 2em}
 
-  /* ---------- diyas ---------- */
-  .diyas {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: clamp(18px, 5vw, 52px);
-    margin-top: clamp(34px, 7vh, 64px);
-    padding: 0 16px;
-  }
+/* ---------- embers & stars ---------- */
+.ember{position:fixed;bottom:-12px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle, rgba(255,224,150,.95), rgba(246,178,62,.35) 60%, transparent 75%);
+  animation:floatUp linear forwards}
+@keyframes floatUp{
+  0%{transform:translate(0,0) scale(1);opacity:0}
+  8%{opacity:var(--o,.8)}85%{opacity:var(--o,.8)}
+  100%{transform:translate(var(--drift,20px),-104vh) scale(.35);opacity:0}
+}
+.star{position:fixed;border-radius:50%;background:#ffe9b0;pointer-events:none;z-index:0;animation:twinkle var(--tw,3s) ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.15;transform:scale(.8)}to{opacity:.8;transform:scale(1.15)}}
 
-  .diya {
-    position: relative;
-    width: var(--s);
-    height: calc(var(--s) * 0.62);
-    animation: rise 1.6s cubic-bezier(.22,.8,.32,1) both;
-  }
-  .diya:nth-child(1) { --s: clamp(38px, 9vw, 58px); animation-delay: .45s; }
-  .diya:nth-child(2) { --s: clamp(48px, 11vw, 74px); animation-delay: .3s; }
-  .diya:nth-child(3) { --s: clamp(58px, 13vw, 92px); animation-delay: .15s; }
-  .diya:nth-child(4) { --s: clamp(48px, 11vw, 74px); animation-delay: .3s; }
-  .diya:nth-child(5) { --s: clamp(38px, 9vw, 58px); animation-delay: .45s; }
+footer{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));width:100%;text-align:center;z-index:3;
+  font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(205,187,156,.4);font-family:Georgia,serif;
+  opacity:0;transition:opacity 1.2s ease;pointer-events:none}
+footer.show{opacity:1}
 
-  .bowl {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 46%;
-    background:
-      radial-gradient(ellipse at 50% 0%, rgba(255, 214, 140, 0.28), transparent 55%),
-      linear-gradient(180deg, var(--clay) 0%, var(--clay-dark) 100%);
-    border-radius: 6% 6% 50% 50% / 12% 12% 120% 120%;
-    box-shadow:
-      inset 0 -4px 8px rgba(0,0,0,.45),
-      0 6px 18px rgba(0,0,0,.5);
-  }
-  .bowl::before {
-    content: "";
-    position: absolute;
-    top: -8%;
-    left: -4%;
-    width: 108%;
-    height: 30%;
-    background: linear-gradient(180deg, #a05a34, #7a3f22);
-    border-radius: 50%;
-    box-shadow: inset 0 2px 3px rgba(255,220,160,.35), inset 0 -3px 5px rgba(0,0,0,.5);
-  }
-
-  .flame-wrap {
-    position: absolute;
-    bottom: 46%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 26%;
-    height: 58%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .flame {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(ellipse at 50% 78%, var(--flame-core) 0%, var(--flame-mid) 42%, var(--flame-edge) 78%, transparent 100%);
-    border-radius: 50% 50% 50% 50% / 68% 68% 32% 32%;
-    transform-origin: 50% 92%;
-    animation: flick 0.9s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 8px rgba(246,178,62,.75));
-  }
-  .flame::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 12%;
-    transform: translateX(-50%);
-    width: 42%;
-    height: 44%;
-    background: radial-gradient(ellipse at 50% 70%, #fffbe8, rgba(255,243,196,0) 72%);
-    border-radius: 50%;
-  }
-  .diya:nth-child(odd) .flame { animation-duration: 1.13s; animation-delay: -.35s; }
-  .diya:nth-child(3)  .flame { animation-duration: .82s; }
-
-  @keyframes flick {
-    0%   { transform: scaleY(1)    scaleX(1)    rotate(-1.6deg); }
-    35%  { transform: scaleY(1.06) scaleX(.97)  rotate(1.2deg); }
-    70%  { transform: scaleY(.97)  scaleX(1.03) rotate(-0.8deg); }
-    100% { transform: scaleY(1.03) scaleX(.98)  rotate(1.8deg); }
-  }
-
-  .glow {
-    position: absolute;
-    bottom: 30%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 340%;
-    padding-top: 340%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(246,178,62,.20) 0%, rgba(246,178,62,.05) 42%, transparent 68%);
-    animation: breathe 2.6s ease-in-out infinite alternate;
-    pointer-events: none;
-  }
-  .diya:nth-child(2) .glow { animation-delay: -.9s; }
-  .diya:nth-child(4) .glow { animation-delay: -1.4s; }
-  .diya:nth-child(3) .glow { animation-duration: 2.1s; }
-
-  @keyframes breathe {
-    from { opacity: .65; }
-    to   { opacity: 1; }
-  }
-
-  /* ---------- floating embers ---------- */
-  .ember {
-    position: fixed;
-    bottom: -12px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,224,150,.95), rgba(246,178,62,.35) 60%, transparent 75%);
-    pointer-events: none;
-    z-index: 1;
-    animation: float-up linear forwards;
-  }
-
-  @keyframes float-up {
-    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
-    8%   { opacity: var(--o, .8); }
-    85%  { opacity: var(--o, .8); }
-    100% { transform: translate(var(--drift, 20px), -104vh) scale(.35); opacity: 0; }
-  }
-
-  footer {
-    position: fixed;
-    bottom: 14px;
-    width: 100%;
-    text-align: center;
-    z-index: 2;
-    font-size: 0.85rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(205, 187, 156, 0.4);
-    font-family: 'Georgia', serif;
-  }
-
-  @media (max-height: 560px) {
-    .diyas { margin-top: 22px; }
-    footer { display: none; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .greeting, .diya { animation: none; }
-    .flame { animation: none; }
-    .glow { animation: none; opacity: .8; }
-    .ember { display: none; }
-  }
+@media (max-height:560px){
+  #st-final .diyas{margin-top:16px}
+  footer{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01s !important;animation-iteration-count:1 !important;transition-duration:.15s !important}
+  .ember,.star{display:none}
+  .diya.lit .flame{transform:scale(1);opacity:1}
+}
 </style>
 </head>
 <body>
-  <canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="sky" aria-hidden="true"></canvas>
 
-  <main class="greeting">
-    <p class="hindi">॥ शुभ दीपावली ॥</p>
-    <h1>Happy Diwali</h1>
-    <div class="rule" aria-hidden="true"><span></span></div>
-    <p class="wish">Wishing you a bright and joyful Diwali</p>
+<div id="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
 
-    <div class="diyas" aria-hidden="true">
-      <div class="diya"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
-      <div class="diya"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
-      <div class="diya"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
-      <div class="diya"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
-      <div class="diya"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
-    </div>
-  </main>
+<!-- Stage 1: opening -->
+<section class="stage active" id="st-open">
+  <div class="emblem rise" aria-hidden="true">
+    <div class="halo"></div>
+    <svg viewBox="0 0 100 100" fill="none">
+      <ellipse cx="50" cy="66" rx="30" ry="10" fill="#7a3f22"/>
+      <path d="M20 66 Q50 92 80 66 L76 60 Q50 80 24 60 Z" fill="#8a4a2b"/>
+      <ellipse cx="50" cy="62" rx="26" ry="7" fill="#5f3018"/>
+      <ellipse cx="50" cy="61" rx="22" ry="5" fill="#3a2410"/>
+      <rect x="48.5" y="46" width="3" height="12" rx="1.5" fill="#2a1a0c"/>
+      <g class="e-flame">
+        <path d="M50 22 C58 34 60 42 50 50 C40 42 42 34 50 22 Z" fill="#f6b23e"/>
+        <path d="M50 32 C54 39 55 44 50 48 C45 44 46 39 50 32 Z" fill="#fff3c4"/>
+      </g>
+    </svg>
+  </div>
+  <p class="eyebrow rise d1">A festival of lights</p>
+  <h2 class="rise d2">Something glows for you</h2>
+  <p class="sub rise d3" style="margin-top:8px">A little celebration, made by hand, one light at a time.</p>
+  <button class="btn rise d4" id="btn-begin" style="margin-top:34px">Begin</button>
+</section>
 
-  <footer>Festival of Lights</footer>
+<!-- Stage 2: light the diyas -->
+<section class="stage" id="st-diyas">
+  <p class="eyebrow">Five little lamps</p>
+  <h2>Light each diya</h2>
+  <p class="sub">Tap every lamp to wake its flame.</p>
+  <div class="ground-glow" aria-hidden="true"></div>
+  <div class="diyas" id="diya-row">
+    <div class="diya" role="button" aria-label="Light diya 1"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div><div class="wick-hint"></div></div>
+    <div class="diya" role="button" aria-label="Light diya 2"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div><div class="wick-hint"></div></div>
+    <div class="diya" role="button" aria-label="Light diya 3"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div><div class="wick-hint"></div></div>
+    <div class="diya" role="button" aria-label="Light diya 4"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div><div class="wick-hint"></div></div>
+    <div class="diya" role="button" aria-label="Light diya 5"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div><div class="wick-hint"></div></div>
+  </div>
+  <p id="diya-count">0 of 5 lit</p>
+  <button class="btn hidden" id="btn-fire">Light up the sky</button>
+</section>
 
+<!-- Stage 3: interactive fireworks -->
+<section class="stage" id="st-fire">
+  <div class="hint-card">
+    <p class="eyebrow">The night sky is yours</p>
+    <h2>Tap the sky</h2>
+    <p class="sub">Every tap sends up a rocket of gold.</p>
+  </div>
+  <p id="burst-count"></p>
+  <button class="btn" id="btn-final">One last thing</button>
+</section>
+
+<!-- Stage 4: the wish -->
+<section class="stage" id="st-final">
+  <p class="hindi rise d1">॥ शुभ दीपावली ॥</p>
+  <h1 class="rise d2">Happy Diwali</h1>
+  <div class="rule rise d3" aria-hidden="true"><span></span></div>
+  <p class="wish rise d3">Wishing you a bright and joyful Diwali</p>
+  <div class="diyas rise d4" aria-hidden="true">
+    <div class="diya lit"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
+    <div class="diya lit"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
+    <div class="diya lit"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
+    <div class="diya lit"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
+    <div class="diya lit"><div class="glow"></div><div class="flame-wrap"><div class="flame"></div></div><div class="bowl"></div></div>
+  </div>
+  <button class="btn rise d4" id="btn-again">Celebrate again</button>
+</section>
+
+<footer id="foot">Festival of Lights</footer>
 <script>
-(function () {
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+(function(){
+"use strict";
+var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $ = function(id){ return document.getElementById(id); };
 
-  /* floating embers */
-  if (!reduceMotion) {
-    var emberCount = 0;
-    setInterval(function () {
-      if (document.hidden || emberCount > 26) return;
-      var e = document.createElement('div');
-      e.className = 'ember';
-      var size = 2 + Math.random() * 4;
-      e.style.width = size + 'px';
-      e.style.height = size + 'px';
-      e.style.left = (4 + Math.random() * 92) + 'vw';
-      e.style.setProperty('--drift', (Math.random() * 120 - 60) + 'px');
-      e.style.setProperty('--o', (0.35 + Math.random() * 0.5).toFixed(2));
-      var dur = 9 + Math.random() * 9;
-      e.style.animationDuration = dur + 's';
-      document.body.appendChild(e);
-      emberCount++;
-      setTimeout(function () { e.remove(); emberCount--; }, dur * 1000 + 200);
-    }, 900);
+/* ---------- stage manager ---------- */
+var stages = ['st-open','st-diyas','st-fire','st-final'];
+var dots = document.querySelectorAll('#dots i');
+var current = 0;
+function goTo(n){
+  if(n === current) return;
+  var from = $(stages[current]), to = $(stages[n]);
+  from.classList.remove('active'); from.classList.add('leaving');
+  setTimeout(function(){ from.classList.remove('leaving'); }, 700);
+  to.classList.add('active');
+  current = n;
+  dots.forEach(function(d,i){ d.classList.toggle('on', i <= n); });
+  $('foot').classList.toggle('show', n === 3);
+  if(n === 2) enterFireworks();
+  if(n === 3) enterFinal();
+  if(n !== 2 && n !== 3) canvasLive(false);
+}
+
+/* ---------- stars & embers ---------- */
+if(!reduce){
+  for(var i=0;i<40;i++){
+    var st=document.createElement('div'); st.className='star';
+    var sz=(Math.random()*1.6+0.6).toFixed(1);
+    st.style.width=sz+'px'; st.style.height=sz+'px';
+    st.style.left=(Math.random()*100)+'vw'; st.style.top=(Math.random()*70)+'vh';
+    st.style.setProperty('--tw',(2+Math.random()*3.5).toFixed(1)+'s');
+    st.style.animationDelay=(-Math.random()*4).toFixed(1)+'s';
+    document.body.appendChild(st);
   }
+  var emberCount=0;
+  setInterval(function(){
+    if(document.hidden || emberCount>22) return;
+    var e=document.createElement('div'); e.className='ember';
+    var size=2+Math.random()*4;
+    e.style.width=size+'px'; e.style.height=size+'px';
+    e.style.left=(4+Math.random()*92)+'vw';
+    e.style.setProperty('--drift',(Math.random()*120-60)+'px');
+    e.style.setProperty('--o',(0.35+Math.random()*0.5).toFixed(2));
+    var dur=9+Math.random()*9;
+    e.style.animationDuration=dur+'s';
+    document.body.appendChild(e); emberCount++;
+    setTimeout(function(){ e.remove(); emberCount--; }, dur*1000+200);
+  }, 1000);
+}
 
-  /* gentle fireworks */
-  var canvas = document.getElementById('sky');
-  var ctx = canvas.getContext('2d');
-  var W, H, rockets = [], sparks = [];
-
-  function resize() {
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+/* ---------- spark burst on ignition ---------- */
+function sparkBurst(x,y){
+  if(reduce) return;
+  for(var i=0;i<14;i++){
+    var s=document.createElement('div'); s.className='spark';
+    var a=Math.random()*Math.PI*2, d=24+Math.random()*46;
+    s.style.left=x+'px'; s.style.top=y+'px';
+    s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px');
+    s.style.setProperty('--dy',(Math.sin(a)*d - 22).toFixed(0)+'px');
+    document.body.appendChild(s);
+    setTimeout(function(el){ el.remove(); }.bind(null,s), 850);
   }
-  resize();
-  window.addEventListener('resize', resize);
+}
 
-  var GOLD = ['#f0c569', '#d9a441', '#ffe9b0', '#e8b04b'];
-
-  function launch() {
-    rockets.push({
-      x: W * (0.15 + Math.random() * 0.7),
-      y: H + 6,
-      vy: -(H * 0.012 + Math.random() * H * 0.004),
-      targetY: H * (0.07 + Math.random() * 0.17),
-      color: GOLD[Math.floor(Math.random() * GOLD.length)]
-    });
-  }
-
-  function burst(x, y, color) {
-    var n = 42 + Math.floor(Math.random() * 22);
-    for (var i = 0; i < n; i++) {
-      var a = (Math.PI * 2 * i) / n + Math.random() * 0.22;
-      var sp = 1.3 + Math.random() * 3.1;
-      sparks.push({
-        x: x, y: y,
-        vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp,
-        life: 1,
-        decay: 0.008 + Math.random() * 0.012,
-        color: Math.random() < 0.75 ? color : GOLD[Math.floor(Math.random() * GOLD.length)],
-        r: 1 + Math.random() * 1.4
-      });
+/* ---------- stage 2: diya lighting ---------- */
+var diyas = Array.prototype.slice.call(document.querySelectorAll('#diya-row .diya'));
+var litCount = 0;
+diyas.forEach(function(d){
+  d.addEventListener('pointerdown', function(ev){
+    if(d.classList.contains('lit')) return;
+    d.classList.add('lit');
+    litCount++;
+    var r = d.getBoundingClientRect();
+    sparkBurst(r.left + r.width/2, r.top + r.height*0.28);
+    if(litCount < 5){
+      $('diya-count').textContent = litCount + ' of 5 lit';
+    } else {
+      $('diya-count').textContent = 'All five are glowing';
+      $('st-diyas').classList.add('all-lit');
+      setTimeout(function(){ $('btn-fire').classList.remove('hidden'); }, reduce ? 100 : 900);
     }
+  });
+});
+
+/* ---------- fireworks engine ---------- */
+var canvas = $('sky'), ctx = canvas.getContext('2d');
+var W, H, rockets = [], sparks = [], rings = [];
+var GOLD = ['#f0c569','#d9a441','#ffe9b0','#e8b04b','#f6b23e'];
+function gold(){ return GOLD[(Math.random()*GOLD.length)|0]; }
+
+function resize(){
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+function launch(tx, ty){
+  var sx = W*0.5 + (Math.random()*W*0.16 - W*0.08);
+  rockets.push({
+    sx:sx, x:sx, y:H+8, tx:tx, ty:ty,
+    vx:0, vy:0, t:0,
+    dur: 34 + Math.random()*14,
+    color: gold(), trail:[]
+  });
+}
+function burst(x,y,color,big){
+  var n = big ? 90 : 44 + ((Math.random()*22)|0);
+  for(var i=0;i<n;i++){
+    var a=(Math.PI*2*i)/n + Math.random()*0.22;
+    var sp=(big?1.9:1.3) + Math.random()*(big?3.8:3.1);
+    sparks.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,
+      decay:0.008+Math.random()*0.012,
+      color: Math.random()<0.75?color:gold(),
+      r:1+Math.random()*1.4});
   }
-
-  function tick() {
-    ctx.clearRect(0, 0, W, H);
-
-    for (var i = rockets.length - 1; i >= 0; i--) {
-      var r = rockets[i];
-      r.y += r.vy;
-      r.vy *= 0.988;
-      ctx.globalAlpha = 0.9;
+  rings.push({x:x,y:y,r:4,life:1,color:color});
+}
+function tick(){
+  ctx.clearRect(0,0,W,H);
+  var i, r, s;
+  for(i=rockets.length-1;i>=0;i--){
+    r = rockets[i]; r.t++;
+    var p = Math.min(r.t/r.dur, 1);
+    var ease = 1 - Math.pow(1-p, 2.2);
+    var px = r.x, py = r.y;
+    r.x = r.sx + (r.tx - r.sx)*ease;
+    r.y = (H+8) + (r.ty - (H+8))*ease;
+    r.trail.push({x:r.x, y:r.y});
+    if(r.trail.length > 12) r.trail.shift();
+    for(var k=0;k<r.trail.length;k++){
+      var tp=r.trail[k];
+      ctx.globalAlpha = (k/r.trail.length)*0.5;
       ctx.fillStyle = r.color;
-      ctx.beginPath();
-      ctx.arc(r.x, r.y, 1.6, 0, Math.PI * 2);
-      ctx.fill();
-      if (r.y <= r.targetY || r.vy > -0.5) {
-        burst(r.x, r.y, r.color);
-        rockets.splice(i, 1);
-      }
-    }
-
-    for (var j = sparks.length - 1; j >= 0; j--) {
-      var s = sparks[j];
-      s.x += s.vx;
-      s.y += s.vy;
-      s.vy += 0.022;
-      s.vx *= 0.985;
-      s.vy *= 0.985;
-      s.life -= s.decay;
-      if (s.life <= 0) { sparks.splice(j, 1); continue; }
-      ctx.globalAlpha = Math.max(s.life, 0) * 0.9;
-      ctx.fillStyle = s.color;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * s.life + 0.3, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(tp.x,tp.y,1.1,0,Math.PI*2); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    requestAnimationFrame(tick);
+    ctx.fillStyle = '#fff3c4';
+    ctx.beginPath(); ctx.arc(r.x,r.y,2.1,0,Math.PI*2); ctx.fill();
+    if(p >= 1){ burst(r.tx, r.ty, r.color); rockets.splice(i,1); }
   }
+  for(i=rings.length-1;i>=0;i--){
+    var g = rings[i];
+    g.r += 2.6; g.life -= 0.03;
+    if(g.life<=0){ rings.splice(i,1); continue; }
+    ctx.globalAlpha = g.life*0.35;
+    ctx.strokeStyle = g.color; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(g.x,g.y,g.r,0,Math.PI*2); ctx.stroke();
+  }
+  for(i=sparks.length-1;i>=0;i--){
+    s = sparks[i];
+    s.x+=s.vx; s.y+=s.vy; s.vy+=0.022; s.vx*=0.985; s.vy*=0.985; s.life-=s.decay;
+    if(s.life<=0){ sparks.splice(i,1); continue; }
+    ctx.globalAlpha = Math.max(s.life,0)*0.9;
+    ctx.fillStyle = s.color;
+    ctx.beginPath(); ctx.arc(s.x,s.y, s.r*s.life+0.3, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(tick);
+}
+if(!reduce) requestAnimationFrame(tick);
+function canvasLive(on){ canvas.classList.toggle('live', !!on); }
 
-  if (!reduceMotion) {
-    tick();
-    setTimeout(launch, 1200);
-    setInterval(function () {
-      if (!document.hidden && rockets.length < 2) launch();
-    }, 3400);
+/* ---------- stage 3: tap-to-burst ---------- */
+var bursts = 0, ambient = null;
+function enterFireworks(){
+  canvasLive(true);
+  bursts = 0;
+  $('burst-count').textContent = '';
+  if(reduce){
+    $('burst-count').textContent = 'Tap anywhere for a little sparkle';
+  } else {
+    /* a welcome volley so the stage never opens empty */
+    setTimeout(function(){ if(current===2) launch(W*0.3, H*0.28); }, 500);
+    setTimeout(function(){ if(current===2) launch(W*0.72, H*0.2); }, 1000);
+    ambient = setInterval(function(){
+      if(document.hidden || current!==2 || rockets.length>2) return;
+      launch(W*(0.15+Math.random()*0.7), H*(0.1+Math.random()*0.3));
+    }, 3200);
   }
+}
+canvas.addEventListener('pointerdown', function(ev){
+  if(current !== 2 && current !== 3) return;
+  var x = ev.clientX, y = ev.clientY;
+  if(y > H*0.72) y = H*0.72;           /* keep bursts in the sky, above the controls */
+  if(reduce){
+    burst(x, y, gold());
+    drawStaticBurst();
+  } else {
+    launch(x, y);
+  }
+  if(current === 2){
+    bursts++;
+    $('burst-count').textContent = bursts === 1 ? '1 firework lit up the night'
+                                                : bursts + ' fireworks lit up the night';
+  }
+});
+/* reduced-motion: draw one static burst frame without the loop */
+function drawStaticBurst(){
+  ctx.clearRect(0,0,W,H);
+  sparks.forEach(function(s){
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = s.color;
+    ctx.beginPath();
+    ctx.arc(s.x + s.vx*6, s.y + s.vy*6, s.r+0.6, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  sparks.length = 0;
+}
+
+/* ---------- stage 4: the wish ---------- */
+function enterFinal(){
+  canvasLive(true);
+  if(ambient){ clearInterval(ambient); ambient = null; }
+  if(reduce){ return; }
+  /* celebration sequence: rising volleys while the greeting settles in */
+  var shots = [
+    [0.18, 0.30, 500], [0.82, 0.26, 1000], [0.5, 0.16, 1600],
+    [0.3, 0.2, 2400], [0.7, 0.32, 3000], [0.5, 0.24, 3900]
+  ];
+  shots.forEach(function(s){
+    setTimeout(function(){
+      if(current===3){ launch(W*s[0], H*s[1]); }
+    }, s[2]);
+  });
+  setTimeout(function(){
+    if(current===3) burst(W*0.5, H*0.2, '#ffe9b0', true);
+  }, 4700);
+}
+
+/* ---------- navigation wiring ---------- */
+$('btn-begin').addEventListener('click', function(){ goTo(1); });
+$('btn-fire').addEventListener('click', function(){ goTo(2); });
+$('btn-final').addEventListener('click', function(){ goTo(3); });
+$('btn-again').addEventListener('click', function(){
+  /* reset diyas and restart the journey */
+  diyas.forEach(function(d){ d.classList.remove('lit'); });
+  litCount = 0;
+  $('diya-count').textContent = '0 of 5 lit';
+  $('st-diyas').classList.remove('all-lit');
+  $('btn-fire').classList.add('hidden');
+  canvasLive(false);
+  goTo(0);
+});
 })();
 </script>
 </body>
